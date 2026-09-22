@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "trail",
-    "slug": "demoapp",
+    "name": "Kanyakumari Bus App",
+    "slug": "kanyakumari-bus-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -43,7 +43,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a2279266-88e2-416d-b5fd-25265b4947d5"
+        "projectId": "b58ab6e2-1116-4c1c-ab6a-1dcc2e863b21"
       }
     },
     "owner": "anandsk06s-team"
