@@ -29,7 +29,7 @@ export default function AdminSettingsScreen() {
 
         <Text style={styles.sectionTitle}>Support</Text>
         <View style={styles.card}>
-          <ActionRow icon="help-circle-outline" title="Help & Support" onPress={() => Alert.alert('Help & Support', 'For assistance, contact the BusTracker administration team.')} />
+          <ActionRow icon="help-circle-outline" title="Help & Support" onPress={() => router.push('/help')} />
           <ActionRow icon="information-circle-outline" title="About BusTracker" onPress={() => Alert.alert('BusTracker', 'Kanniyakumari Government Bus Navigation Application\n\nThis application helps users find government buses, routes and bus stops across Kanniyakumari district.\n\nAdmin Panel: Used to manage buses, routes, bus stops and view reports.')} last />
         </View>
       </ScrollView>
