@@ -127,7 +127,7 @@ const HOME_ROUTES = {
   search: "/search",
   availableBuses: "/available-buses",
   routes: "/routes",
-  touristPlaces: "/tourist-places",
+  touristPlaces: "/touristplaces",
   nearbyStops: "/nearby-stops",
   help: "/help",
 } as const;
@@ -300,7 +300,7 @@ export default function HomeScreen() {
         nearby: HOME_ROUTES.nearbyStops,
         popular: HOME_ROUTES.routes,
         favorites: "/favorites",
-        help: HOME_ROUTES.help,
+        help: "/help",
       };
       const route = routeByAction[actionId];
       if (route) router.push(route as never);
@@ -309,7 +309,7 @@ export default function HomeScreen() {
   );
 
   const handleTouristPlacesPress = useCallback(() => {
-    router.push(HOME_ROUTES.touristPlaces as never);
+    router.push("/touristplaces");
   }, [router]);
 
   const handleNavPress = useCallback(
@@ -318,8 +318,8 @@ export default function HomeScreen() {
       const routeByTab: Record<string, string> = {
         favorites: "/favorites",
         routes: "/routes",
-        explore: HOME_ROUTES.touristPlaces,
-        help: HOME_ROUTES.help,
+        explore: "/touristplaces",
+        help: "/help",
       };
       const route = routeByTab[tabId];
       if (route) router.push(route as never);
