@@ -16,7 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useBusContext, BusType, FareCategory, BusStatus } from '../../../store/bus-store';
-import SelectField from '../../../components/admin/select-field';
+import SelectField from '../../../../components/admin/select-field';
 
 const COLORS = {
   primary: '#0B1F3A',

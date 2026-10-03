@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useStopContext, StopStatus } from '../../../store/stop-store';
 import { useRouteContext } from '../../../store/route-store';
-import SelectField from '../../../components/admin/select-field';
+import SelectField from '../../../../components/admin/select-field';
 
 const COLORS = {
   primary: '#0B1F3A',
