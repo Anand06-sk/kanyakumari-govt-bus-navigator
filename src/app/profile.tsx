@@ -396,12 +396,7 @@ export default function Profile() {
             icon="document-text-outline"
             title="Reports"
             subtitle="View submitted reports"
-            onPress={() =>
-              Alert.alert(
-                "Reports",
-                "No pending reports"
-              )
-            }
+            onPress={() => router.push("/report")}
           />
         </View>
 
