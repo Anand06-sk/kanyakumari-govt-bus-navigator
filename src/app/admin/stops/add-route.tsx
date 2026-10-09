@@ -15,8 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRouteContext, RouteStatus } from '../../../store/route-store';
 import { useStopContext } from '../../../store/stop-store';
-import SelectField from '../../../components/admin/select-field';
-import StopsEditor from '../../../components/admin/stops-editor';
+import SelectField from '../../../../components/admin/select-field';
+import StopsEditor from '../../../../components/admin/stops-editor';
 
 const COLORS = {
   primary: '#0B1F3A',

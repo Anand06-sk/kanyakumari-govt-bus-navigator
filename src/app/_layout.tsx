@@ -40,6 +40,11 @@ export default function RootLayout() {
       <Stack.Screen name="available-buses" options={{ headerShown:false}}/>
       <Stack.Screen name="routes" options={{ headerShown:false}}/>
       <Stack.Screen name="search" options={{ headerShown:false}}/>
+      <Stack.Screen name="profile" options={{ headerShown:false}}/>
+      <Stack.Screen name="history" options={{ headerShown:false}}/>
+      <Stack.Screen name="report" options={{ headerShown:false}}/>
+      <Stack.Screen name="qns" options={{ headerShown:false}}/>
+      <Stack.Screen name="settings" options={{ headerShown:false}}/>
     </Stack>
   );
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
 export type BusType = 'Ordinary' | 'Low-Floor Bus' | 'Deluxe';
 export type FareCategory = 'women_free' | 'regular_paid';
@@ -29,7 +29,7 @@ export interface Bus {
   id: string;
   busNumber: string;
   busType: BusType;
-  // Optional only for compatibility with bus records created before these fields existed.
+  // Optional for compatibility with records created before these fields existed.
   serviceType?: BusServiceType;
   schemeEligibility?: SchemeEligibility;
   fareCategory: FareCategory;
@@ -50,44 +50,83 @@ interface BusContextValue {
   getBusById: (id: string | undefined) => Bus | undefined;
 }
 
+// Sample records are illustrative only and are not an official government bus list.
+const initialBuses: Bus[] = [
+  {
+    id: 'bus-1',
+    busNumber: 'TN-74-1001',
+    busType: 'Ordinary',
+    schemeEligibility: 'pending_verification',
+    fareCategory: 'regular_paid',
+    regularFare: 25,
+    womenFare: 25,
+    startPoint: 'Nagercoil',
+    destination: 'Kanyakumari',
+    routeNumber: 'KK-01',
+    status: 'Active',
+    stops: ['Nagercoil Bus Stand', 'Suchindram', 'Kanyakumari'],
+  },
+  {
+    id: 'bus-2',
+    busNumber: 'TN-74-2002',
+    busType: 'Low-Floor Bus',
+    schemeEligibility: 'pending_verification',
+    fareCategory: 'women_free',
+    regularFare: 18,
+    womenFare: 0,
+    startPoint: 'Kanyakumari',
+    destination: 'Nagercoil',
+    routeNumber: 'KK-02',
+    status: 'Active',
+    stops: ['Kanyakumari', 'Suchindram', 'Nagercoil'],
+  },
+];
+
 const BusContext = createContext<BusContextValue | undefined>(undefined);
 
 export function BusProvider({ children }: { children: React.ReactNode }) {
-  const [buses, setBuses] = useState<Bus[]>([]);
+  const [buses, setBuses] = useState<Bus[]>(initialBuses);
 
   const addBus = (bus: Omit<Bus, 'id'>) => {
-    setBuses((current) => [
-      ...current,
-      {
-        ...bus,
-        schemeEligibility: bus.schemeEligibility ?? 'pending_verification',
-        id: `${Date.now()}-${current.length}`,
-      },
-    ]);
+    const newBus: Bus = {
+      ...bus,
+      schemeEligibility: bus.schemeEligibility ?? 'pending_verification',
+      id: `bus-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    };
+
+    setBuses((current) => [newBus, ...current]);
   };
 
   const updateBus = (id: string, updates: Partial<Omit<Bus, 'id'>>) => {
-    setBuses((current) => current.map((bus) => (bus.id === id ? { ...bus, ...updates } : bus)));
+    setBuses((current) =>
+      current.map((bus) => (bus.id === id ? { ...bus, ...updates } : bus))
+    );
   };
 
   const deleteBus = (id: string) => {
     setBuses((current) => current.filter((bus) => bus.id !== id));
   };
 
-  const getBusById = (id: string | undefined) => buses.find((bus) => bus.id === id);
+  const getBusById = (id: string | undefined) => {
+    if (!id) return undefined;
+    return buses.find((bus) => bus.id === id);
+  };
 
-  return (
-    <BusContext.Provider value={{ buses, addBus, updateBus, deleteBus, getBusById }}>
-      {children}
-    </BusContext.Provider>
+  const value = useMemo<BusContextValue>(
+    () => ({ buses, addBus, updateBus, deleteBus, getBusById }),
+    [buses]
   );
+
+  return <BusContext.Provider value={value}>{children}</BusContext.Provider>;
 }
 
-export function useBusContext() {
+export function useBusContext(): BusContextValue {
   const context = useContext(BusContext);
+
   if (!context) {
-    throw new Error('useBusContext must be used inside BusProvider');
+    throw new Error('useBusContext must be used within a BusProvider');
   }
+
   return context;
 }
 
