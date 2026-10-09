@@ -44,6 +44,7 @@ export default function RootLayout() {
       <Stack.Screen name="history" options={{ headerShown:false}}/>
       <Stack.Screen name="report" options={{ headerShown:false}}/>
       <Stack.Screen name="qns" options={{ headerShown:false}}/>
+      <Stack.Screen name="settings" options={{ headerShown:false}}/>
     </Stack>
   );
 }

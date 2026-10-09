@@ -767,7 +767,9 @@ export default function HomeScreen() {
             <View style={styles.guestMenuDivider} />
             <TouchableOpacity
               style={styles.guestMenuAction}
-              onPress={() => setGuestMenuVisible(false)}
+              onPress={() =>{ setGuestMenuVisible(false)
+                router.push("/settings");}
+              }
               accessibilityLabel="Open settings"
             >
               <Ionicons
@@ -784,7 +786,11 @@ export default function HomeScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.guestMenuAction}
-              onPress={() => setGuestMenuVisible(false)}
+              onPress={() =>{ 
+                setGuestMenuVisible(false);
+                router.push("/help");
+}
+              }
               accessibilityLabel="Open help and support"
             >
               <Ionicons
@@ -793,6 +799,26 @@ export default function HomeScreen() {
                 color={COLORS.textSecondary}
               />
               <Text style={styles.guestMenuActionText}>Help &amp; Support</Text>
+              <Ionicons
+                name="chevron-forward"
+                size={moderateScale(17)}
+                color={COLORS.textSecondary}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.guestMenuAction}
+              onPress={() => {setGuestMenuVisible(false);
+                router.push("/admin/dashboard");
+              }}
+              accessibilityLabel="Open admin Page"
+            >
+              <Ionicons
+                name="person-circle"
+                size={moderateScale(20)}
+                color={COLORS.textSecondary}
+              />
+              <Text style={styles.guestMenuActionText}>Admin</Text>
               <Ionicons
                 name="chevron-forward"
                 size={moderateScale(17)}
