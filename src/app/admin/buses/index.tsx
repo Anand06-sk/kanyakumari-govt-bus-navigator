@@ -97,9 +97,6 @@ export default function ManageBusesScreen() {
       </View>
 
       <Text style={styles.busType}>{item.busType}</Text>
-      <Text style={styles.serviceType}>
-        Service: {item.serviceType ?? 'Not recorded'}
-      </Text>
 
       <View style={styles.routeRow}>
         <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
@@ -122,7 +119,7 @@ export default function ManageBusesScreen() {
 
       {item.fareCategory === 'women_free' ? (
         <Text style={styles.regularFareText}>
-          Legacy fare: women ₹{item.womenFare}; others ₹{item.regularFare}
+          Women: {item.womenFare === 0 ? 'FREE' : `₹${item.womenFare}`}; others ₹{item.regularFare}
         </Text>
       ) : (
         <Text style={styles.regularFareText}>Fare: ₹{item.regularFare} for everyone</Text>
@@ -335,7 +332,6 @@ const styles = StyleSheet.create({
   routeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   routeText: { fontSize: 13, color: COLORS.textPrimary, fontWeight: '600' },
   routeNumberText: { fontSize: 12, color: COLORS.textSecondary, marginTop: 4, marginLeft: 18 },
-  serviceType: { fontSize: 12, color: COLORS.textSecondary, marginTop: 3 },
   eligibilityBadge: {
     flexDirection: 'row',
     alignItems: 'center',

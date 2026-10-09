@@ -20,9 +20,7 @@ import {
   BusType,
   FareCategory,
   BusStatus,
-  BusServiceType,
   SchemeEligibility,
-  BUS_SERVICE_TYPES,
 } from '../../../store/bus-store';
 import SelectField from '../../../components/admin/select-field';
 
@@ -40,7 +38,6 @@ const COLORS = {
 };
 
 const BUS_TYPES: BusType[] = ['Ordinary', 'Low-Floor Bus', 'Deluxe'];
-const FARE_CATEGORIES: FareCategory[] = ['women_free', 'regular_paid'];
 const STATUS_OPTIONS: BusStatus[] = ['Active', 'Inactive'];
 const ELIGIBILITY_LABELS: Record<SchemeEligibility, string> = {
   eligible: 'Eligible',
@@ -54,9 +51,8 @@ export default function AddBusScreen() {
 
   const [busNumber, setBusNumber] = useState('');
   const [busType, setBusType] = useState<BusType | ''>('');
-  const [serviceType, setServiceType] = useState<BusServiceType | ''>('');
   const [schemeEligibility, setSchemeEligibility] = useState<SchemeEligibility>('pending_verification');
-  const [fareCategory, setFareCategory] = useState<FareCategory | ''>('');
+  const [fareCategory, setFareCategory] = useState<FareCategory>('regular_paid');
   const [fareAmount, setFareAmount] = useState('');
   const [startPoint, setStartPoint] = useState('');
   const [destination, setDestination] = useState('');
@@ -83,8 +79,6 @@ export default function AddBusScreen() {
 
     if (!busNumber.trim()) newErrors.busNumber = 'Please enter the bus number.';
     if (!busType) newErrors.busType = 'Please select the bus type.';
-    if (!serviceType) newErrors.serviceType = 'Please select the service type.';
-    if (!fareCategory) newErrors.fareCategory = 'Please select the fare category.';
     if (!fareAmount.trim()) {
       newErrors.fareAmount = 'Please enter the fare amount.';
     } else if (!Number.isFinite(Number(fareAmount))) {
@@ -115,9 +109,8 @@ export default function AddBusScreen() {
     addBus({
       busNumber: busNumber.trim().toUpperCase(),
       busType: busType as BusType,
-      serviceType: serviceType as BusServiceType,
       schemeEligibility,
-      fareCategory: fareCategory as FareCategory,
+      fareCategory,
       regularFare: Number(fareAmount),
       womenFare: fareCategory === 'women_free' ? 0 : Number(fareAmount),
       startPoint: startPoint.trim(),
@@ -127,27 +120,7 @@ export default function AddBusScreen() {
       stops: stopCount > 0 ? stops.slice(0, stopCount).map((stop) => stop.trim()) : [],
     });
 
-    // Reset form
-    setBusNumber('');
-    setBusType('');
-    setServiceType('');
-    setSchemeEligibility('pending_verification');
-    setFareCategory('');
-    setFareAmount('');
-    setStartPoint('');
-    setDestination('');
-    setRouteNumber('');
-    setStopCount(0);
-    setStops([]);
-    setStatus('Active');
-    setErrors({});
-
-    Alert.alert('Bus Added Successfully', 'The bus has been added. Redirecting to buses list...', [
-      {
-        text: 'OK',
-        onPress: () => router.replace('/admin/buses'),
-      },
-    ]);
+    router.replace('/admin/buses');
   };
 
   return (
@@ -198,25 +171,16 @@ export default function AddBusScreen() {
           {errors.busType ? <Text style={styles.errorText}>{errors.busType}</Text> : null}
 
           <SelectField
-            label="Service Type"
-            value={serviceType}
-            options={BUS_SERVICE_TYPES}
-            onSelect={(val) => {
-              setServiceType(val as BusServiceType);
-              if (errors.serviceType) setErrors((prev) => ({ ...prev, serviceType: '' }));
-            }}
-            accessibilityLabel="Bus service type selector"
-          />
-          {errors.serviceType ? <Text style={styles.errorText}>{errors.serviceType}</Text> : null}
-
-          <SelectField
             label="Vettri Payanam Scheme Eligibility"
             value={ELIGIBILITY_LABELS[schemeEligibility]}
             options={ELIGIBILITY_OPTIONS}
             onSelect={(val) => {
               const nextEligibility = (Object.keys(ELIGIBILITY_LABELS) as SchemeEligibility[])
                 .find((eligibility) => ELIGIBILITY_LABELS[eligibility] === val);
-              if (nextEligibility) setSchemeEligibility(nextEligibility);
+              if (nextEligibility) {
+                setSchemeEligibility(nextEligibility);
+                setFareCategory(nextEligibility === 'eligible' ? 'women_free' : 'regular_paid');
+              }
             }}
             accessibilityLabel="Vettri Payanam scheme eligibility selector"
           />
@@ -224,26 +188,10 @@ export default function AddBusScreen() {
             <View style={styles.eligibilityWarning} accessibilityRole="alert">
               <Ionicons name="alert-circle-outline" size={18} color={COLORS.warning} />
               <Text style={styles.eligibilityWarningText}>
-                Eligibility is pending verification. Do not mark this bus eligible based only on its service type or fare category.
+                Eligibility is pending verification. Confirm it against applicable official scheme rules before marking it eligible.
               </Text>
             </View>
           ) : null}
-
-          <SelectField
-            label="Legacy Fare Category"
-            value={fareCategory === 'women_free' ? 'Women Free (legacy)' : fareCategory === 'regular_paid' ? 'Regular Paid (legacy)' : ''}
-            options={FARE_CATEGORIES.map((category) => category === 'women_free' ? 'Women Free (legacy)' : 'Regular Paid (legacy)')}
-            onSelect={(val) => {
-              const nextCategory = val === 'Women Free (legacy)' ? 'women_free' : 'regular_paid';
-              setFareCategory(nextCategory);
-              if (errors.fareCategory) setErrors((prev) => ({ ...prev, fareCategory: '' }));
-            }}
-            accessibilityLabel="Fare category selector"
-          />
-          {errors.fareCategory ? <Text style={styles.errorText}>{errors.fareCategory}</Text> : null}
-          <Text style={styles.fareHint}>
-            This legacy fare category is retained for compatibility and does not determine scheme eligibility.
-          </Text>
 
           {fareCategory && (
             <View style={styles.fieldGroup}>
@@ -262,8 +210,8 @@ export default function AddBusScreen() {
               />
               <Text style={styles.fareHint}>
                 {fareCategory === 'women_free'
-                  ? 'Legacy fare treatment: women fare ₹0. This does not verify scheme eligibility.'
-                  : 'Legacy fare treatment: the same fare applies to all passengers.'}
+                  ? 'Women’s fare is free. Enter the regular fare.'
+                  : 'Fare applies to all passengers.'}
               </Text>
               {errors.fareAmount ? <Text style={styles.errorText}>{errors.fareAmount}</Text> : null}
             </View>

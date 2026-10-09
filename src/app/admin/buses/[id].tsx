@@ -63,7 +63,6 @@ export default function BusDetailsScreen() {
             <Text style={styles.busNumber}>{bus.busNumber}</Text>
           </View>
           <Text style={styles.busType}>{bus.busType}</Text>
-          <Text style={styles.secondaryText}>Service type: {bus.serviceType ?? 'Not recorded'}</Text>
           <Text style={styles.route}>{bus.startPoint} → {bus.destination}</Text>
           <Text style={styles.secondaryText}>Route: {bus.routeNumber}</Text>
           <View style={styles.statusRow}>
@@ -84,12 +83,12 @@ export default function BusDetailsScreen() {
           </Text>
           {schemeEligibility === 'pending_verification' ? (
             <Text style={styles.eligibilityWarning}>
-              Verify this bus against applicable official service rules. Fare category and service type do not establish eligibility.
+              Verify this bus against applicable official scheme rules before marking it eligible.
             </Text>
           ) : null}
-          <Text style={styles.label}>Legacy Fare Category</Text>
+          <Text style={styles.label}>Fare Category</Text>
           <Text style={styles.value}>
-            {bus.fareCategory === 'women_free' ? 'Women Free (legacy)' : 'Regular Paid (legacy)'}
+            {bus.fareCategory === 'women_free' ? 'Women Free' : 'Regular Paid'}
           </Text>
           {bus.fareCategory === 'women_free' ? (
             <>

@@ -3,34 +3,12 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 export type BusType = 'Ordinary' | 'Low-Floor Bus' | 'Deluxe';
 export type FareCategory = 'women_free' | 'regular_paid';
 export type BusStatus = 'Active' | 'Inactive';
-export type BusServiceType =
-  | 'Ordinary Town'
-  | 'Express'
-  | 'LSS'
-  | 'Deluxe'
-  | 'Mofussil Ordinary'
-  | 'Ghat Ordinary'
-  | 'SETC Long Distance'
-  | 'Other';
 export type SchemeEligibility = 'eligible' | 'not_eligible' | 'pending_verification';
-
-export const BUS_SERVICE_TYPES: BusServiceType[] = [
-  'Ordinary Town',
-  'Express',
-  'LSS',
-  'Deluxe',
-  'Mofussil Ordinary',
-  'Ghat Ordinary',
-  'SETC Long Distance',
-  'Other',
-];
 
 export interface Bus {
   id: string;
   busNumber: string;
   busType: BusType;
-  // Optional for compatibility with records created before these fields existed.
-  serviceType?: BusServiceType;
   schemeEligibility?: SchemeEligibility;
   fareCategory: FareCategory;
   regularFare: number;
