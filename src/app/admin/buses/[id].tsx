@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useBusContext } from '../../../store/bus-store';
+import { useBusContext, getSchemeEligibility } from '../../../store/bus-store';
 
 const COLORS = {
   primary: '#0B1F3A',
@@ -12,6 +12,7 @@ const COLORS = {
   textPrimary: '#172033',
   textSecondary: '#667085',
   success: '#2E7D32',
+  warning: '#B45309',
   border: '#D9DEE7',
 };
 
@@ -20,6 +21,7 @@ export default function BusDetailsScreen() {
   const busId = Array.isArray(params.id) ? params.id[0] : params.id;
   const { getBusById } = useBusContext();
   const bus = getBusById(busId);
+  const schemeEligibility = bus ? getSchemeEligibility(bus) : 'pending_verification';
 
   if (!bus) {
     return (
@@ -61,6 +63,7 @@ export default function BusDetailsScreen() {
             <Text style={styles.busNumber}>{bus.busNumber}</Text>
           </View>
           <Text style={styles.busType}>{bus.busType}</Text>
+          <Text style={styles.secondaryText}>Service type: {bus.serviceType ?? 'Not recorded'}</Text>
           <Text style={styles.route}>{bus.startPoint} → {bus.destination}</Text>
           <Text style={styles.secondaryText}>Route: {bus.routeNumber}</Text>
           <View style={styles.statusRow}>
@@ -71,9 +74,22 @@ export default function BusDetailsScreen() {
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>FARE INFORMATION</Text>
-          <Text style={styles.label}>Fare Category</Text>
+          <Text style={styles.label}>Vettri Payanam Eligibility</Text>
           <Text style={styles.value}>
-            {bus.fareCategory === 'women_free' ? 'Women Free' : 'Regular Paid Service'}
+            {schemeEligibility === 'eligible'
+              ? 'Eligible'
+              : schemeEligibility === 'not_eligible'
+                ? 'Not eligible'
+                : 'Pending verification'}
+          </Text>
+          {schemeEligibility === 'pending_verification' ? (
+            <Text style={styles.eligibilityWarning}>
+              Verify this bus against applicable official service rules. Fare category and service type do not establish eligibility.
+            </Text>
+          ) : null}
+          <Text style={styles.label}>Legacy Fare Category</Text>
+          <Text style={styles.value}>
+            {bus.fareCategory === 'women_free' ? 'Women Free (legacy)' : 'Regular Paid (legacy)'}
           </Text>
           {bus.fareCategory === 'women_free' ? (
             <>
@@ -113,6 +129,7 @@ const styles = StyleSheet.create({
   label: { fontSize: 12, color: COLORS.textSecondary, marginTop: 12 },
   value: { fontSize: 16, color: COLORS.textPrimary, fontWeight: '600', marginTop: 4 },
   freeValue: { fontSize: 16, color: COLORS.success, fontWeight: '700', marginTop: 4 },
+  eligibilityWarning: { color: COLORS.warning, fontSize: 12, lineHeight: 18, marginTop: 8 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   notFoundText: { color: COLORS.textSecondary, fontSize: 15 },
 });

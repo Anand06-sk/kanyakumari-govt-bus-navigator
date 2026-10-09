@@ -3,11 +3,35 @@ import React, { createContext, useContext, useState } from 'react';
 export type BusType = 'Ordinary' | 'Low-Floor Bus' | 'Deluxe';
 export type FareCategory = 'women_free' | 'regular_paid';
 export type BusStatus = 'Active' | 'Inactive';
+export type BusServiceType =
+  | 'Ordinary Town'
+  | 'Express'
+  | 'LSS'
+  | 'Deluxe'
+  | 'Mofussil Ordinary'
+  | 'Ghat Ordinary'
+  | 'SETC Long Distance'
+  | 'Other';
+export type SchemeEligibility = 'eligible' | 'not_eligible' | 'pending_verification';
+
+export const BUS_SERVICE_TYPES: BusServiceType[] = [
+  'Ordinary Town',
+  'Express',
+  'LSS',
+  'Deluxe',
+  'Mofussil Ordinary',
+  'Ghat Ordinary',
+  'SETC Long Distance',
+  'Other',
+];
 
 export interface Bus {
   id: string;
   busNumber: string;
   busType: BusType;
+  // Optional only for compatibility with bus records created before these fields existed.
+  serviceType?: BusServiceType;
+  schemeEligibility?: SchemeEligibility;
   fareCategory: FareCategory;
   regularFare: number;
   womenFare: number;
@@ -32,7 +56,14 @@ export function BusProvider({ children }: { children: React.ReactNode }) {
   const [buses, setBuses] = useState<Bus[]>([]);
 
   const addBus = (bus: Omit<Bus, 'id'>) => {
-    setBuses((current) => [...current, { ...bus, id: `${Date.now()}-${current.length}` }]);
+    setBuses((current) => [
+      ...current,
+      {
+        ...bus,
+        schemeEligibility: bus.schemeEligibility ?? 'pending_verification',
+        id: `${Date.now()}-${current.length}`,
+      },
+    ]);
   };
 
   const updateBus = (id: string, updates: Partial<Omit<Bus, 'id'>>) => {
@@ -58,4 +89,8 @@ export function useBusContext() {
     throw new Error('useBusContext must be used inside BusProvider');
   }
   return context;
+}
+
+export function getSchemeEligibility(bus: Pick<Bus, 'schemeEligibility'>): SchemeEligibility {
+  return bus.schemeEligibility ?? 'pending_verification';
 }

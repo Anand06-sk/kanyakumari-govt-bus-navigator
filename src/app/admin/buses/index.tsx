@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useBusContext, Bus } from '../../../store/bus-store';
+import { useBusContext, Bus, getSchemeEligibility } from '../../../store/bus-store';
 
 const COLORS = {
   primary: '#0B1F3A',
@@ -25,10 +25,12 @@ const COLORS = {
   success: '#2E7D32',
   error: '#D32F2F',
   border: '#D9DEE7',
-  womenFreeBackground: '#FCE7F3',
-  womenFreeBorder: '#F9A8D4',
-  womenFreeText: '#BE185D',
-  womenFreeIcon: '#DB2777',
+  eligibilityBackground: '#FCE7F3',
+  eligibilityBorder: '#F9A8D4',
+  eligibilityText: '#BE185D',
+  pendingBackground: '#FFFBEB',
+  pendingBorder: '#FCD34D',
+  pendingText: '#B45309',
 };
 
 type StatusFilter = 'All' | 'Active' | 'Inactive';
@@ -95,6 +97,9 @@ export default function ManageBusesScreen() {
       </View>
 
       <Text style={styles.busType}>{item.busType}</Text>
+      <Text style={styles.serviceType}>
+        Service: {item.serviceType ?? 'Not recorded'}
+      </Text>
 
       <View style={styles.routeRow}>
         <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
@@ -105,17 +110,20 @@ export default function ManageBusesScreen() {
       </View>
       <Text style={styles.routeNumberText}>Route: {item.routeNumber}</Text>
 
-      {item.fareCategory === 'women_free' ? (
-        <View
-          style={styles.womenFreeSection}
-          accessibilityLabel="Women Travel FREE. Others pay the regular fare."
-        >
-          <View style={styles.womenFreeBadge}>
-            <Ionicons name="ribbon-outline" size={15} color={COLORS.womenFreeIcon} />
-            <Text style={styles.womenFreeBadgeText}>Women Travel FREE</Text>
-          </View>
-          <Text style={styles.womenFreeFareText}>Others: ₹{item.regularFare}</Text>
+      {getSchemeEligibility(item) === 'eligible' ? (
+        <View style={styles.eligibilityBadge} accessibilityLabel="Eligible for Vettri Payanam free travel">
+          <Text style={styles.eligibilityBadgeText}>FREE TRAVEL — VETTRI PAYANAM</Text>
         </View>
+      ) : getSchemeEligibility(item) === 'pending_verification' ? (
+        <View style={styles.pendingBadge} accessibilityLabel="Scheme eligibility pending verification">
+          <Text style={styles.pendingBadgeText}>Eligibility Pending</Text>
+        </View>
+      ) : null}
+
+      {item.fareCategory === 'women_free' ? (
+        <Text style={styles.regularFareText}>
+          Legacy fare: women ₹{item.womenFare}; others ₹{item.regularFare}
+        </Text>
       ) : (
         <Text style={styles.regularFareText}>Fare: ₹{item.regularFare} for everyone</Text>
       )}
@@ -327,21 +335,32 @@ const styles = StyleSheet.create({
   routeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   routeText: { fontSize: 13, color: COLORS.textPrimary, fontWeight: '600' },
   routeNumberText: { fontSize: 12, color: COLORS.textSecondary, marginTop: 4, marginLeft: 18 },
-  womenFreeSection: { marginTop: 10, alignSelf: 'flex-start', maxWidth: '100%' },
-  womenFreeBadge: {
+  serviceType: { fontSize: 12, color: COLORS.textSecondary, marginTop: 3 },
+  eligibilityBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     maxWidth: '100%',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.womenFreeBorder,
-    backgroundColor: COLORS.womenFreeBackground,
+    borderColor: COLORS.eligibilityBorder,
+    backgroundColor: COLORS.eligibilityBackground,
+    marginTop: 10,
   },
-  womenFreeBadgeText: { color: COLORS.womenFreeText, fontSize: 12, fontWeight: '700', marginLeft: 5 },
-  womenFreeFareText: { color: COLORS.textPrimary, fontSize: 12, fontWeight: '600', marginTop: 5 },
+  eligibilityBadgeText: { color: COLORS.eligibilityText, fontSize: 12, fontWeight: '700' },
+  pendingBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.pendingBorder,
+    backgroundColor: COLORS.pendingBackground,
+    marginTop: 10,
+  },
+  pendingBadgeText: { color: COLORS.pendingText, fontSize: 12, fontWeight: '700' },
   regularFareText: { color: COLORS.textPrimary, fontSize: 12, fontWeight: '600', marginTop: 10 },
   statusRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },

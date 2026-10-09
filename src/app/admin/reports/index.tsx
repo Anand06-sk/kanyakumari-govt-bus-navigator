@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useBusContext } from '../../../store/bus-store';
+import { useBusContext, getSchemeEligibility } from '../../../store/bus-store';
 import { useRouteContext } from '../../../store/route-store';
 import { useStopContext } from '../../../store/stop-store';
 
@@ -19,9 +19,6 @@ const COLORS = {
   error: '#D32F2F',
   warning: '#B45309',
   border: '#D9DEE7',
-  womenFreeBg: '#FCE7F3',
-  womenFreeBorder: '#F9A8D4',
-  womenFreeText: '#BE185D',
 };
 
 function safePercent(part: number, total: number): `${number}%` {
@@ -44,10 +41,13 @@ export default function ReportsScreen() {
       typeCounts[b.busType] = (typeCounts[b.busType] || 0) + 1;
     });
 
-    const womenFree = buses.filter((b) => b.fareCategory === 'women_free').length;
-    const regularPaid = total - womenFree;
+    const eligible = buses.filter((bus) => getSchemeEligibility(bus) === 'eligible').length;
+    const notEligible = buses.filter((bus) => getSchemeEligibility(bus) === 'not_eligible').length;
+    const pendingVerification = buses.filter(
+      (bus) => getSchemeEligibility(bus) === 'pending_verification'
+    ).length;
 
-    return { total, active, inactive, typeCounts, womenFree, regularPaid };
+    return { total, active, inactive, typeCounts, eligible, notEligible, pendingVerification };
   }, [buses]);
 
   const routeStats = useMemo(() => {
@@ -319,26 +319,25 @@ export default function ReportsScreen() {
           )}
         </View>
 
-        {/* ---------- FARE SUMMARY ---------- */}
-        <View style={styles.card} accessibilityLabel="Fare summary section">
-          <Text style={styles.cardTitle}>Fare Summary</Text>
-
-          {busStats.total === 0 ? (
-            <Text style={styles.emptyText}>No bus data available</Text>
-          ) : (
-            <>
-              <View style={styles.fareRow}>
-                <View style={styles.womenFreeBadge}>
-                  <Text style={styles.womenFreeBadgeText}>Women Travel FREE</Text>
-                </View>
-                <Text style={styles.rowValue}>{busStats.womenFree} buses</Text>
-              </View>
-              <View style={styles.fareRow}>
-                <Text style={styles.rowLabel}>Regular Paid</Text>
-                <Text style={styles.rowValue}>{busStats.regularPaid} buses</Text>
-              </View>
-            </>
-          )}
+        <View style={styles.card} accessibilityLabel="Vettri Payanam eligibility summary">
+          <Text style={styles.cardTitle}>Vettri Payanam Eligibility</Text>
+          <Text style={styles.emptyText}>
+            Records without a verified eligibility value are counted as pending verification.
+          </Text>
+          <View style={styles.rowBetween}>
+            <Text style={styles.rowLabel}>Eligible</Text>
+            <Text style={[styles.rowValue, { color: COLORS.success }]}>{busStats.eligible} buses</Text>
+          </View>
+          <View style={styles.rowBetween}>
+            <Text style={styles.rowLabel}>Not eligible</Text>
+            <Text style={styles.rowValue}>{busStats.notEligible} buses</Text>
+          </View>
+          <View style={styles.rowBetween}>
+            <Text style={styles.rowLabel}>Pending verification</Text>
+            <Text style={[styles.rowValue, { color: COLORS.warning }]}>
+              {busStats.pendingVerification} buses
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -443,21 +442,4 @@ const styles = StyleSheet.create({
   routeRowNumber: { fontSize: 13, fontWeight: '700', color: COLORS.textPrimary },
   routeRowName: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
   routeRowBuses: { fontSize: 12, color: COLORS.textPrimary, marginTop: 2 },
-  fareRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  womenFreeBadge: {
-    backgroundColor: COLORS.womenFreeBg,
-    borderWidth: 1,
-    borderColor: COLORS.womenFreeBorder,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  womenFreeBadgeText: { fontSize: 11, fontWeight: '700', color: COLORS.womenFreeText },
 });
