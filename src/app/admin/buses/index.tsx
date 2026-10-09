@@ -10,6 +10,7 @@ import {
   FlatList,
   Alert,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -60,6 +61,15 @@ export default function ManageBusesScreen() {
   }, [buses, searchText, statusFilter, typeFilter]);
 
   const handleDelete = (bus: Bus) => {
+    const removeBus = () => deleteBus(bus.id);
+
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm(`Delete bus ${bus.busNumber}?`)) {
+        removeBus();
+      }
+      return;
+    }
+
     Alert.alert(
       'Delete Bus?',
       'Are you sure you want to delete this bus?',
@@ -68,10 +78,7 @@ export default function ManageBusesScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            deleteBus(bus.id);
-            Alert.alert('Deleted', 'Bus deleted successfully.');
-          },
+          onPress: removeBus,
         },
       ],
       { cancelable: true }
@@ -83,64 +90,66 @@ export default function ManageBusesScreen() {
   };
 
   const renderBusCard = ({ item }: { item: Bus }) => (
-    <TouchableOpacity
-      style={styles.busCard}
-      activeOpacity={0.85}
-      onPress={() => router.push(`/admin/buses/${item.id}` as any)}
-      accessibilityLabel={`Bus ${item.busNumber} card`}
-    >
-      <View style={styles.cardHeaderRow}>
-        <View style={styles.cardHeaderLeft}>
-          <Ionicons name="bus" size={20} color={COLORS.primary} />
-          <Text style={styles.busNumber}>  {item.busNumber}</Text>
+    <View style={styles.busCard}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => router.push(`/admin/buses/${item.id}` as any)}
+        accessibilityLabel={`Bus ${item.busNumber} details`}
+        accessibilityRole="button"
+      >
+        <View style={styles.cardHeaderRow}>
+          <View style={styles.cardHeaderLeft}>
+            <Ionicons name="bus" size={20} color={COLORS.primary} />
+            <Text style={styles.busNumber}>  {item.busNumber}</Text>
+          </View>
         </View>
-      </View>
 
-      <Text style={styles.busType}>{item.busType}</Text>
+        <Text style={styles.busType}>{item.busType}</Text>
 
-      <View style={styles.routeRow}>
-        <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
-        <Text style={styles.routeText}>
-          {' '}
-          {item.startPoint} → {item.destination}
-        </Text>
-      </View>
-      <Text style={styles.routeNumberText}>Route: {item.routeNumber}</Text>
-
-      {getSchemeEligibility(item) === 'eligible' ? (
-        <View style={styles.eligibilityBadge} accessibilityLabel="Eligible for Vettri Payanam free travel">
-          <Text style={styles.eligibilityBadgeText}>FREE TRAVEL — VETTRI PAYANAM</Text>
+        <View style={styles.routeRow}>
+          <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
+          <Text style={styles.routeText}>
+            {' '}
+            {item.startPoint} → {item.destination}
+          </Text>
         </View>
-      ) : getSchemeEligibility(item) === 'pending_verification' ? (
-        <View style={styles.pendingBadge} accessibilityLabel="Scheme eligibility pending verification">
-          <Text style={styles.pendingBadgeText}>Eligibility Pending</Text>
+        <Text style={styles.routeNumberText}>Route: {item.routeNumber}</Text>
+
+        {getSchemeEligibility(item) === 'eligible' ? (
+          <View style={styles.eligibilityBadge} accessibilityLabel="Eligible for Vettri Payanam free travel">
+            <Text style={styles.eligibilityBadgeText}>FREE TRAVEL — VETTRI PAYANAM</Text>
+          </View>
+        ) : getSchemeEligibility(item) === 'pending_verification' ? (
+          <View style={styles.pendingBadge} accessibilityLabel="Scheme eligibility pending verification">
+            <Text style={styles.pendingBadgeText}>Eligibility Pending</Text>
+          </View>
+        ) : null}
+
+        {item.fareCategory === 'women_free' ? (
+          <Text style={styles.regularFareText}>
+            Women: {item.womenFare === 0 ? 'FREE' : `₹${item.womenFare}`}; others ₹{item.regularFare}
+          </Text>
+        ) : (
+          <Text style={styles.regularFareText}>Fare: ₹{item.regularFare} for everyone</Text>
+        )}
+
+        <View style={styles.statusRow}>
+          <View
+            style={[
+              styles.statusDot,
+              { backgroundColor: item.status === 'Active' ? COLORS.success : COLORS.textSecondary },
+            ]}
+          />
+          <Text
+            style={[
+              styles.statusText,
+              { color: item.status === 'Active' ? COLORS.success : COLORS.textSecondary },
+            ]}
+          >
+            {item.status}
+          </Text>
         </View>
-      ) : null}
-
-      {item.fareCategory === 'women_free' ? (
-        <Text style={styles.regularFareText}>
-          Women: {item.womenFare === 0 ? 'FREE' : `₹${item.womenFare}`}; others ₹{item.regularFare}
-        </Text>
-      ) : (
-        <Text style={styles.regularFareText}>Fare: ₹{item.regularFare} for everyone</Text>
-      )}
-
-      <View style={styles.statusRow}>
-        <View
-          style={[
-            styles.statusDot,
-            { backgroundColor: item.status === 'Active' ? COLORS.success : COLORS.textSecondary },
-          ]}
-        />
-        <Text
-          style={[
-            styles.statusText,
-            { color: item.status === 'Active' ? COLORS.success : COLORS.textSecondary },
-          ]}
-        >
-          {item.status}
-        </Text>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.cardActionsRow}>
         <TouchableOpacity
@@ -163,29 +172,11 @@ export default function ManageBusesScreen() {
           <Text style={styles.actionButtonTextDelete}>  Delete</Text>
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          accessibilityLabel="Go back button"
-          accessibilityRole="button"
-        >
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Manage Buses</Text>
-        <TouchableOpacity
-          onPress={() => router.push('/admin/buses/add')}
-          accessibilityLabel="Add bus button"
-          accessibilityRole="button"
-        >
-          <Ionicons name="add-circle" size={28} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
-
+  const listHeader = (
+    <View>
       <View style={styles.searchWrapper}>
         <Ionicons name="search" size={18} color={COLORS.textSecondary} />
         <TextInput
@@ -220,9 +211,7 @@ export default function ManageBusesScreen() {
       </View>
 
       <View style={styles.filterRow}>
-        {(
-          ['All', 'Ordinary', 'Low-Floor Bus', 'Deluxe'] as TypeFilter[]
-        ).map((type) => (
+        {(['All', 'Ordinary', 'Low-Floor Bus', 'Deluxe'] as TypeFilter[]).map((type) => (
           <TouchableOpacity
             key={type}
             style={[styles.filterChip, typeFilter === type && styles.filterChipActive]}
@@ -238,38 +227,70 @@ export default function ManageBusesScreen() {
           </TouchableOpacity>
         ))}
       </View>
+    </View>
+  );
 
-      {filteredBuses.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="bus-outline" size={48} color={COLORS.textSecondary} />
-          <Text style={styles.emptyStateTitle}>
-            {buses.length === 0 ? 'No buses available' : 'No buses found'}
-          </Text>
-          <Text style={styles.emptyStateSubtitle}>
-            {buses.length === 0
-              ? 'Add a new bus to start managing transportation data.'
-              : 'Try a different search or filter.'}
-          </Text>
-          {buses.length === 0 && (
-            <TouchableOpacity
-              style={styles.emptyStateButton}
-              onPress={() => router.push('/admin/buses/add')}
-              accessibilityLabel="Add bus button"
-              accessibilityRole="button"
-            >
-              <Text style={styles.emptyStateButtonText}>+ Add Bus</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      ) : (
-        <FlatList
-          data={filteredBuses}
-          keyExtractor={(item) => item.id}
-          renderItem={renderBusCard}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+  const emptyList = (
+    <View style={styles.emptyState}>
+      <Ionicons name="bus-outline" size={48} color={COLORS.textSecondary} />
+      <Text style={styles.emptyStateTitle}>
+        {buses.length === 0 ? 'No buses available' : 'No buses found'}
+      </Text>
+      <Text style={styles.emptyStateSubtitle}>
+        {buses.length === 0
+          ? 'Add a new bus to start managing transportation data.'
+          : 'Try a different search or filter.'}
+      </Text>
+      {buses.length === 0 ? (
+        <TouchableOpacity
+          style={styles.emptyStateButton}
+          onPress={() => router.push('/admin/buses/add')}
+          accessibilityLabel="Add bus button"
+          accessibilityRole="button"
+        >
+          <Text style={styles.emptyStateButtonText}>+ Add Bus</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/admin/dashboard');
+            }
+          }}
+          accessibilityLabel="Go back button"
+          accessibilityRole="button"
+        >
+          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Manage Buses</Text>
+        <TouchableOpacity
+          onPress={() => router.push('/admin/buses/add')}
+          accessibilityLabel="Add bus button"
+          accessibilityRole="button"
+        >
+          <Ionicons name="add-circle" size={28} color={COLORS.primary} />
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        style={styles.busList}
+        data={filteredBuses}
+        keyExtractor={(item) => item.id}
+        renderItem={renderBusCard}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={emptyList}
+        contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 }
@@ -313,6 +334,7 @@ const styles = StyleSheet.create({
   filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   filterChipText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '600' },
   filterChipTextActive: { color: COLORS.card },
+  busList: { flex: 1 },
   listContent: { padding: 20, paddingTop: 10 },
   busCard: {
     backgroundColor: COLORS.card,

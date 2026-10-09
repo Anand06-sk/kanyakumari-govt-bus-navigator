@@ -40,7 +40,6 @@ const COLORS = {
 };
 
 const BUS_TYPES: BusType[] = ['Ordinary', 'Low-Floor Bus', 'Deluxe'];
-const FARE_CATEGORIES: FareCategory[] = ['women_free', 'regular_paid'];
 const STATUS_OPTIONS: BusStatus[] = ['Active', 'Inactive'];
 const ELIGIBILITY_LABELS: Record<SchemeEligibility, string> = {
   eligible: 'Eligible',
@@ -79,7 +78,17 @@ export default function EditBusScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} accessibilityLabel="Back button" accessibilityRole="button">
+          <TouchableOpacity
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace('/admin/buses');
+              }
+            }}
+            accessibilityLabel="Back button"
+            accessibilityRole="button"
+          >
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Bus</Text>
@@ -126,15 +135,22 @@ export default function EditBusScreen() {
       stops,
     });
 
-    Alert.alert('Bus Updated Successfully', undefined, [
-      {
-        text: 'OK',
-        onPress: () => router.replace('/admin/buses'),
-      },
-    ]);
+    router.replace('/admin/buses');
   };
 
   const handleDelete = () => {
+    const removeBus = () => {
+      deleteBus(existingBus.id);
+      router.replace('/admin/buses');
+    };
+
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm(`Delete bus ${existingBus.busNumber}?`)) {
+        removeBus();
+      }
+      return;
+    }
+
     Alert.alert(
       'Delete Bus?',
       'Are you sure you want to delete this bus?',
@@ -143,15 +159,7 @@ export default function EditBusScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            deleteBus(existingBus.id);
-            Alert.alert('Deleted', 'Bus deleted successfully.', [
-              {
-                text: 'OK',
-                onPress: () => router.replace('/admin/buses'),
-              },
-            ]);
-          },
+          onPress: removeBus,
         },
       ],
       { cancelable: true }
@@ -161,7 +169,17 @@ export default function EditBusScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} accessibilityLabel="Back button" accessibilityRole="button">
+        <TouchableOpacity
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/admin/buses');
+            }
+          }}
+          accessibilityLabel="Back button"
+          accessibilityRole="button"
+        >
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Bus</Text>
